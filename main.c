@@ -6,12 +6,12 @@
 #include <GL/gl.h>
 #include <GL/glu.h>
 #include <GL/freeglut.h>
-#include "math.h"       //No linux se faz necessário a utilização dessas bibliotecas em separado para evitar erros.
+#include "math.h"       //No linux se faz necessário a utilização dessas bibliotecas em separado para evitar erros. (Ou -lm no linker)
 #include "stdbool.h"    //Também é necessário fazer algumas chamadas no linker do compilador na guia settings->compiler...
 #include "objetosSolares.h"
 
-float distanciaPrimitiva=200.0;
-float multiplicador = 0.9995;
+float distanciaPrimitiva=400.0;     //Posição inicial da estrela da morte em relação a terra
+float multiplicador = 0.9995;       //Indice gravitacional
 
 /**Carregamento das texturas salvas na pasta resources */
 GLuint carregaTextura(const char* arquivo) {
@@ -64,20 +64,14 @@ void render_satelite(float gravidade){
 }
 void iluminacao(){
 	if(exibir_terra){
-		float luzAmbiente[] = {0.0, 0.0, 0.0, 1.0};
-	    float luzDifusa0[] = {difusa, difusa, difusa, 1.0};
-	    float luzEpecular0[] = {especular, especular, especular, 1.0};
 	    float luzPosicional0[] = {0.0, 0.0, 3.0, posicional};
-	    float luzDE[] = {0.0, 1.0, 0.0, 1.0};
-	    float luzPosicional1[] = {1.0, 2.0, 0.0, 1.0};
-	    float luzGlobal[] = {global, global, global, 1.0};
 
 	    glEnable(GL_LIGHT0);        //Faz com que a terra ilumine a estrela da morte (Ou qualquer objeto proximo)
 	    glDisable(GL_LIGHTING);     //Iluminação própria da terra.
 	    glPushMatrix();
 	        glRotatef(luzBranca.X, 1.0, 0.0, 0.0);
 	        glRotatef(luzBranca.Y, 0.0, 1.0, 0.0);
-	        glLightfv(GL_LIGHT0, GL_POSITION, luzPosicional0);                      //Parametros de fonte clara de luz. Pode ter várias fontes de luz.
+	        glLightfv(GL_LIGHT0, GL_POSITION, luzPosicional0);                      //Parametros de fonte clara de luz. Pode ter várias fontes de luz. Terra ilumina Death-Star
 	        glTranslatef(luzPosicional0[0], luzPosicional0[1], luzPosicional0[2]);
 	        glColor3f(difusa, difusa, difusa);
 	        planeta_terra();
@@ -94,8 +88,8 @@ void estadoCamera(){
     camera.Z = 800 * cos(anguloCameraA) * sin(anguloCameraB);
     switch(modoCamera){
     	case 1:
-            gluLookAt(cursor.X+camera.X, camera.Y, cursor.Z+camera.Z, cursor.X+0, 0, cursor.Z+0, 0, 1, 0);
-    	break;
+            gluLookAt(cursor.X+camera.X, camera.Y, cursor.Z+camera.Z, cursor.X+0, 0, cursor.Z+0, 0, 1, 0);  //Visualização da cena - Ponto do olho; Ponto de referência de variação;
+    	break;                                                                                              // Especifica o vetor do ponto de referencia
     	case 2:
             gluLookAt(0, 0, 1080, 0, 0, 0, 0, 1, 0);
     	break;
@@ -184,10 +178,10 @@ void estadoTeclado(unsigned char key, int x, int y){
 			}
 		break;
 		case 'E':
-			if(surge_death_star == 1){
+			if(surge_death_star == 0){
 				surge_death_star = 10;
 			} else{
-				surge_death_star = 1;
+				surge_death_star = 0;
 			}
 		break;
 	}
